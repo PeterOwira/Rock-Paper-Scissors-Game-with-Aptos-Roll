@@ -12,7 +12,7 @@ compiled_package_info:
     std: "0000000000000000000000000000000000000000000000000000000000000001"
     vm: "0000000000000000000000000000000000000000000000000000000000000000"
     vm_reserved: "0000000000000000000000000000000000000000000000000000000000000000"
-  source_digest: C57A0D00E50D7AC61246C3425DBAE9E505F02105A31EC200E98A209066F5EC0C
+  source_digest: EC9C3A2228B8E5D96C17C7A4F91EB7A7521149AAC6C0E4957313EBCD2F56E496
   build_flags:
     dev_mode: false
     test_mode: false
@@ -37,6 +37,7 @@ compiled_package_info:
         - "fmt::skip"
         - legacy_entry_fun
         - "lint::allow_unsafe_randomness"
+        - "lint::skip"
         - native_interface
         - randomness
         - resource_group
@@ -48,7 +49,8 @@ compiled_package_info:
       skip_attribute_checks: false
       compiler_version: ~
       language_version: ~
-      experiments: []
+      experiments:
+        - optimize=on
 dependencies:
   - AptosFramework
   - AptosStdlib

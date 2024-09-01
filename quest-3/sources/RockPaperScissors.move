@@ -8,6 +8,10 @@ module RockPaperScissors {
     const PAPER: u8 = 2;
     const SCISSORS: u8 = 3;
 
+    const PLAYER_WINS: u8 = 2;
+    const DRAW: u8 = 1;
+    const COMPUTER_WINS: u8 = 3;
+
     struct Game has key {
         player: address,
         player_move: u8,   
@@ -15,18 +19,28 @@ module RockPaperScissors {
         result: u8,
     }
 
-    public entry fun start_game(account: &signer) {
+    // Initializes a new game for the player.
+    public entry fun start_game(account: &signer) acquires Game {
         let player = signer::address_of(account);
-
-        let game = Game {
-            player,
-            player_move: 0,
-            computer_move: 0,
-            result: 0,
-        };
-
-        move_to(account, game);
+        
+        if (exists<Game>(player)) {
+            // If a game already exists, reset the game state
+            let game = borrow_global_mut<Game>(player);
+            game.player_move = 0;
+            game.computer_move = 0;
+            game.result = 0;
+        } else {
+            // If no game exists, create a new one
+            let game = Game {
+                player,
+                player_move: 0,
+                computer_move: 0,
+                result: 0,
+            };
+            move_to(account, game);
+        }
     }
+
 
     public entry fun set_player_move(account: &signer, player_move: u8) acquires Game {
         let game = borrow_global_mut<Game>(signer::address_of(account));
@@ -49,17 +63,18 @@ module RockPaperScissors {
         game.result = determine_winner(game.player_move, game.computer_move);
     }
 
+    // Determines the winner based on the player's and computer's moves.
     fun determine_winner(player_move: u8, computer_move: u8): u8 {
-        if (player_move == ROCK && computer_move == SCISSORS) {
-            2 // player wins
-        } else if (player_move == PAPER && computer_move == ROCK) {
-            2 // player wins
-        } else if (player_move == SCISSORS && computer_move == PAPER) {
-            2 // player wins
-        } else if (player_move == computer_move) {
-            1 // draw
+        if (player_move == computer_move) {
+            DRAW
+        } else if (
+            (player_move == ROCK && computer_move == SCISSORS) ||
+            (player_move == PAPER && computer_move == ROCK) ||
+            (player_move == SCISSORS && computer_move == PAPER)
+        ) {
+            PLAYER_WINS
         } else {
-            3 // computer wins
+            COMPUTER_WINS
         }
     }
 
