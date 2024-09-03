@@ -14,7 +14,11 @@ module RockPaperScissors {
 
     struct Game has key {
         player: address,
-        player_move: u8,   
+        player_wins: u8,
+        computer_wins: u8,
+        draws: u8,
+        current_round: u8,
+        player_move: u8,
         computer_move: u8,
         result: u8,
     }
@@ -29,10 +33,15 @@ module RockPaperScissors {
             game.player_move = 0;
             game.computer_move = 0;
             game.result = 0;
+            game.current_round = game.current_round + 1;
         } else {
             // If no game exists, create a new one
             let game = Game {
                 player,
+                player_wins: 0,
+                computer_wins: 0,
+                draws: 0,
+                current_round: 1,
                 player_move: 0,
                 computer_move: 0,
                 result: 0,
@@ -72,10 +81,27 @@ module RockPaperScissors {
             (player_move == PAPER && computer_move == ROCK) ||
             (player_move == SCISSORS && computer_move == PAPER)
         ) {
-            PLAYER_WINS
+            PLAYER_WINS           
         } else {
             COMPUTER_WINS
         }
+    }
+
+    // Updates the win count and round number based on the game result.
+    public entry fun update_game_stats(account: &signer) acquires Game {
+        let game = borrow_global_mut<Game>(signer::address_of(account));
+
+        game.current_round = game.current_round + 1;
+
+        if (game.result == PLAYER_WINS) {
+            game.player_wins = game.player_wins+1;
+        } else if (game.result == COMPUTER_WINS) {
+            game.computer_wins = game.computer_wins + 1;
+        } else {
+            game.draws = game.draws + 1;
+        }
+
+       
     }
 
     #[view]
@@ -91,6 +117,12 @@ module RockPaperScissors {
     #[view]
     public fun get_game_results(account_addr: address): u8 acquires Game {
         borrow_global<Game>(account_addr).result
+    }
+
+    // Additional view function to get the current round number.
+    #[view]
+    public fun get_current_round(account_addr: address): u8 acquires Game {
+        borrow_global<Game>(account_addr).current_round
     }
 
 }
